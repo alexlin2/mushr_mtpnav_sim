@@ -33,25 +33,45 @@ def send_nav_goal(plan):
     for c in plan:
         goal = c.split(',')
         car_number = int(goal[0])
-        dest_x = float(goal[1])
-        dest_y = float(goal[2])
 
-        pose_data = current_pose["car"+str(car_number)]
-
-        path_x = np.linspace(pose_data.position.x, dest_x, num=20)
-        path_y = np.linspace(pose_data.position.y, dest_y, num=20)
-        
+        waypoints = []    
         paths = XYHVPath()
-        for i in range(20):
-            path = XYHV()
-            path.x = path_x[i]
-            path.y = path_y[i]
-            path.h = math.atan2(path.y, path.x)
-            path.v = float(1)
-            paths.waypoints.append(path) 
 
+        curr_pose_data = current_pose["car"+str(car_number)]
+
+        waypoints.append((curr_pose_data.position.x, curr_pose_data.position.y))
+        
+        for i in range(1, len(goal)):
+            s = goal[i]
+            wp_x = float(s[s.find('(')+1:s.find(' ')])
+            wp_y = float(s[s.find(' ')+1:s.find(')')])
+            waypoints.append((wp_x, wp_y))
+            
+        #print(waypoints)
+
+        def dist(x1, x2):
+            return math.sqrt( ((x1[0]-x2[0])**2) + ((x1[1]-x2[1])**2) )
+
+        for wp_num in range(len(waypoints)-1):
+            x1 = waypoints[wp_num]
+            x2 = waypoints[wp_num+1]
+    
+            d = int(dist(x1, x2))
+            path_x = np.linspace(x1[0], x2[0], d)
+            path_y = np.linspace(x1[1], x2[1], d)
+            print(path_x)
+            print(path_y)
+            for i in range(d-1):
+                path = XYHV()
+                path.x = path_x[i]
+                path.y = path_y[i]
+                path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
+                path.v = 2.0
+                paths.waypoints.append(path) 
+            
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
         send_path(paths)
+        
     
 
 def cb_pose(msg, arg):
@@ -61,7 +81,6 @@ def cb_pose(msg, arg):
 def send_init_pose(pub_init_pose, init_pose):
     pose_data = init_pose.split(",")
     assert len(pose_data) == 3
-    print(pose_data)
 
     x, y, theta = float(pose_data[0]), float(pose_data[1]), float(pose_data[2])
     q = Quaternion(*quaternion_from_euler(0, 0, theta))
@@ -97,6 +116,8 @@ if __name__ == "__main__":
         rospy.sleep(1.0)
         
         get_start_pose(pub_init_pose, plan)
+
+        rospy.sleep(1.0)
 
     
     else:
