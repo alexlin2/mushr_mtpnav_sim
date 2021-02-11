@@ -14,9 +14,11 @@ from mushr_rhc_ros.srv import FollowPath
 from mushr_rhc_ros.msg import XYHVPath, XYHV
 from tf.transformations import quaternion_from_euler
 
-init_pose = {"car1":"", "car2":"", "car3":"", "car4":""} 
+RADIUS = 2.0
 
-current_pose = {"car1":"", "car2":"", "car3":"", "car4":""}
+init_pose = {} 
+
+current_pose = {}
 
 def get_start_pose(pub_init_pose, plan):
     init_pose["car1"] = plan.pop(0)
@@ -39,7 +41,7 @@ def send_nav_goal(plan):
 
         curr_pose_data = current_pose["car"+str(car_number)]
 
-        waypoints.append((curr_pose_data.position.x, curr_pose_data.position.y))
+        #waypoints.append((curr_pose_data.position.x, curr_pose_data.position.y))
         
         for i in range(1, len(goal)):
             s = goal[i]
@@ -56,18 +58,25 @@ def send_nav_goal(plan):
             x1 = waypoints[wp_num]
             x2 = waypoints[wp_num+1]
     
-            d = int(dist(x1, x2))
-            path_x = np.linspace(x1[0], x2[0], d)
-            path_y = np.linspace(x1[1], x2[1], d)
-            print(path_x)
-            print(path_y)
-            for i in range(d-1):
+            d = dist(x1, x2)
+            print(d)
+            if d < RADIUS:
                 path = XYHV()
-                path.x = path_x[i]
-                path.y = path_y[i]
-                path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
-                path.v = 2.0
+                path.x = x1[0]
+                path.y = x1[1]
+                path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
+                path.v = 1.0
                 paths.waypoints.append(path) 
+            else:
+                path_x = np.linspace(x1[0], x2[0], int(d * 2))
+                path_y = np.linspace(x1[1], x2[1], int(d * 2))
+                for i in range(int(d * 2)-1):
+                    path = XYHV()
+                    path.x = path_x[i]
+                    path.y = path_y[i]
+                    path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
+                    path.v = 1.0
+                    paths.waypoints.append(path) 
             
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
         send_path(paths)
