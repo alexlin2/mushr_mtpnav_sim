@@ -30,7 +30,7 @@ def gen_semi_circle(x, y, direction):
     elif direction == 'ne':
         start, end = pi, pi/2
     elif direction == 'sw':
-        start, end = 0, 3 * pi /2
+        start, end = 0, - pi /2
     elif direction == 'se':
         start, end = pi, 3 * pi /2
 
@@ -40,4 +40,4 @@ def gen_semi_circle(x, y, direction):
         print('(' + str(x_float)+' '+str(y_float) + ')', end=',')
         
 if __name__ == "__main__":
-    gen_manhattan_path((0,0), (8, 8))
+    gen_manhattan_path((8,8), (16, 0))

@@ -65,7 +65,7 @@ def send_nav_goal(plan):
                 path.x = x1[0]
                 path.y = x1[1]
                 path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
-                path.v = 1.0
+                path.v = 0.8
                 paths.waypoints.append(path) 
             else:
                 path_x = np.linspace(x1[0], x2[0], int(d * 2))
@@ -75,7 +75,7 @@ def send_nav_goal(plan):
                     path.x = path_x[i]
                     path.y = path_y[i]
                     path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
-                    path.v = 1.0
+                    path.v = 0.8
                     paths.waypoints.append(path) 
             
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
