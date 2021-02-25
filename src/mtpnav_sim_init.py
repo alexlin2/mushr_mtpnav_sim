@@ -14,7 +14,7 @@ from mushr_rhc_ros.srv import FollowPath
 from mushr_rhc_ros.msg import XYHVPath, XYHV
 from tf.transformations import quaternion_from_euler
 
-RADIUS = 2.0
+RADIUS = 1.5
 
 init_pose = {} 
 
@@ -22,11 +22,11 @@ current_pose = {}
 
 def get_start_pose(pub_init_pose, plan):
     init_pose["car1"] = plan.pop(0)
-    #init_pose["car2"] = plan.pop(0)
+    init_pose["car2"] = plan.pop(0)
     #init_3 = plan.pop(0)
     #init_4 = plan.pop(0)
     send_init_pose(pub_init_pose[0], init_pose["car1"])
-    #send_init_pose(pub_init_pose[1], init_pose["car2"])
+    send_init_pose(pub_init_pose[1], init_pose["car2"])
     #send_init_pose(pub_init_pose[2], init_3)
     #send_init_pose(pub_init_pose[3], init_4)
 
@@ -114,22 +114,30 @@ if __name__ == "__main__":
         queue_size=10,
     )
 
+    rospy.Subscriber(
+        "/" + "car2" + "/" + "car_pose",
+        PoseStamped,
+        cb_pose,
+        callback_args="car2",
+        queue_size=10,
+    )
+
     if not real:
        
         pub_init_pose_1 = rospy.Publisher("/car1/initialpose", PoseWithCovarianceStamped, queue_size=1)
-        #pub_init_pose_2 = rospy.Publisher("/car2/initialpose", PoseWithCovarianceStamped, queue_size=1)
+        pub_init_pose_2 = rospy.Publisher("/car2/initialpose", PoseWithCovarianceStamped, queue_size=1)
         #pub_init_pose_3 = rospy.Publisher("/car3/initialpose", PoseWithCovarianceStamped, queue_size=1)
         #pub_init_pose_4 = rospy.Publisher("/car4/initialpose", PoseWithCovarianceStamped, queue_size=1)
-        pub_init_pose = [pub_init_pose_1]
+        pub_init_pose = [pub_init_pose_1, pub_init_pose_2]
 
         rospy.sleep(1.0)
         
         get_start_pose(pub_init_pose, plan)
 
-        rospy.sleep(1.0)
 
     
     else:
+        plan.pop(0)
         plan.pop(0)
 
     rospy.sleep(1.0)

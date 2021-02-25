@@ -1,7 +1,7 @@
 from math import cos, sin, pi
 import numpy as np
 
-curve_radius = 2.0
+curve_radius = 1.5
 
 def gen_manhattan_path(x, y):
     (x1, x2) = x
@@ -40,4 +40,4 @@ def gen_semi_circle(x, y, direction):
         print('(' + str(x_float)+' '+str(y_float) + ')', end=',')
         
 if __name__ == "__main__":
-    gen_manhattan_path((8,8), (16, 0))
+    gen_manhattan_path((5,6), (0, 3))
