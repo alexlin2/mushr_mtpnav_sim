@@ -14,7 +14,7 @@ from mushr_rhc_ros.srv import FollowPath
 from mushr_rhc_ros.msg import XYHVPath, XYHV
 from tf.transformations import quaternion_from_euler
 
-RADIUS = 1.5
+RADIUS = 0.63
 
 init_pose = {} 
 
@@ -60,22 +60,22 @@ def send_nav_goal(plan):
     
             d = dist(x1, x2)
             print(d)
-            if d < RADIUS:
+            if d < 1:
                 path = XYHV()
                 path.x = x1[0]
                 path.y = x1[1]
                 path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
-                path.v = 0.8
+                path.v = 1.0
                 paths.waypoints.append(path) 
             else:
-                path_x = np.linspace(x1[0], x2[0], int(d * 2))
-                path_y = np.linspace(x1[1], x2[1], int(d * 2))
-                for i in range(int(d * 2)-1):
+                path_x = np.linspace(x1[0], x2[0], int(d * 3))
+                path_y = np.linspace(x1[1], x2[1], int(d * 3))
+                for i in range(int(d * 3)-1):
                     path = XYHV()
                     path.x = path_x[i]
                     path.y = path_y[i]
                     path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
-                    path.v = 0.8
+                    path.v = 1.0
                     paths.waypoints.append(path) 
             
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
@@ -101,24 +101,24 @@ if __name__ == "__main__":
     rospy.init_node("mtpnav_sim_init")
 
     plan_file = rospy.get_param("~plan_file")
-    real = rospy.get_param("~real_car") == "true"
+    real = rospy.get_param("~real_car")
 
     with open(plan_file) as f:
         plan = f.readlines()
 
     rospy.Subscriber(
-        "/" + "car1" + "/" + "car_pose",
+        "/" + "car30" + "/" + "car_pose",
         PoseStamped,
         cb_pose,
-        callback_args="car1",
+        callback_args="car30",
         queue_size=10,
     )
 
     rospy.Subscriber(
-        "/" + "car2" + "/" + "car_pose",
+        "/" + "car38" + "/" + "car_pose",
         PoseStamped,
         cb_pose,
-        callback_args="car2",
+        callback_args="car38",
         queue_size=10,
     )
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         #pub_init_pose_3 = rospy.Publisher("/car3/initialpose", PoseWithCovarianceStamped, queue_size=1)
         #pub_init_pose_4 = rospy.Publisher("/car4/initialpose", PoseWithCovarianceStamped, queue_size=1)
         pub_init_pose = [pub_init_pose_1, pub_init_pose_2]
-
+        rospy.loginfo("Currently in sim")
         rospy.sleep(1.0)
         
         get_start_pose(pub_init_pose, plan)
