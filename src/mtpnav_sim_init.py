@@ -18,8 +18,6 @@ RADIUS = 0.63
 
 init_pose = {} 
 
-current_pose = {}
-
 def get_start_pose(pub_init_pose, plan):
     init_pose["car1"] = plan.pop(0)
     init_pose["car2"] = plan.pop(0)
@@ -38,10 +36,6 @@ def send_nav_goal(plan):
 
         waypoints = []    
         paths = XYHVPath()
-
-        curr_pose_data = current_pose["car"+str(car_number)]
-
-        #waypoints.append((curr_pose_data.position.x, curr_pose_data.position.y))
         
         for i in range(1, len(goal)):
             s = goal[i]
@@ -51,32 +45,16 @@ def send_nav_goal(plan):
             
         #print(waypoints)
 
-        def dist(x1, x2):
-            return math.sqrt( ((x1[0]-x2[0])**2) + ((x1[1]-x2[1])**2) )
-
         for wp_num in range(len(waypoints)-1):
             x1 = waypoints[wp_num]
             x2 = waypoints[wp_num+1]
-    
-            d = dist(x1, x2)
-            print(d)
-            if d < 1:
-                path = XYHV()
-                path.x = x1[0]
-                path.y = x1[1]
-                path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
-                path.v = 1.0
-                paths.waypoints.append(path) 
-            else:
-                path_x = np.linspace(x1[0], x2[0], int(d * 3))
-                path_y = np.linspace(x1[1], x2[1], int(d * 3))
-                for i in range(int(d * 3)-1):
-                    path = XYHV()
-                    path.x = path_x[i]
-                    path.y = path_y[i]
-                    path.h = math.atan2(path_y[i+1] - path.y, path_x[i+1] - path.x)
-                    path.v = 1.0
-                    paths.waypoints.append(path) 
+            path = XYHV()
+            path.x = x1[0]
+            path.y = x1[1]
+            path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
+            path.v = 1.0
+            paths.waypoints.append(path) 
+        
             
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
         send_path(paths)
@@ -105,22 +83,6 @@ if __name__ == "__main__":
 
     with open(plan_file) as f:
         plan = f.readlines()
-
-    rospy.Subscriber(
-        "/" + "car30" + "/" + "car_pose",
-        PoseStamped,
-        cb_pose,
-        callback_args="car30",
-        queue_size=10,
-    )
-
-    rospy.Subscriber(
-        "/" + "car38" + "/" + "car_pose",
-        PoseStamped,
-        cb_pose,
-        callback_args="car38",
-        queue_size=10,
-    )
 
     if not real:
        
