@@ -1,9 +1,11 @@
 <launch>
     <arg name="plan_file" default="$(find mushr_mtpnav_sim)/start.txt" />
     <arg name="real_car" default="true" />
+    <arg name="use_algames" default="true" />
 
     <node pkg="mushr_mtpnav_sim" type="mtpnav_sim_init.py" name="mtpnav_sim_init" output="screen">
         <param name="plan_file" value="$(arg plan_file)" />
         <param name="real_car" value="$(arg real_car)" />
+        <param name="use_algames" value="$(arg use_algames)" />
     </node>
 </launch>
