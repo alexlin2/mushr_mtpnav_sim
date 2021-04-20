@@ -117,6 +117,7 @@ def read_csv(plan_file):
             x_coord = [float(idx) for idx in df['x{}'.format(j+1)][i].strip('][').split(', ')]
             y_coord = [float(idx) for idx in df['y{}'.format(j+1)][i].strip('][').split(', ')]
             # TODO: Transform heading angle according to ROS
+            # For algames, car facing east is at 0 deg and facing north is at 90 deg
             heading = [float(idx) for idx in df['h{}'.format(j+1)][i].strip('][').split(', ')]
             vel = [float(idx) for idx in df['v{}'.format(j+1)][i].strip('][').split(', ')]
             throttle = [float(idx) for idx in df['a{}'.format(j+1)][i].strip('][').split(', ')]
