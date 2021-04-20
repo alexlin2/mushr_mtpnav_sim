@@ -1,25 +1,28 @@
 from math import cos, sin, pi, sqrt
 import numpy as np
 
+turning_speed = 0.6
+speed = 1.0
+
 def gen_manhattan_path(direction):
     
     if direction[0] == 'n':
-        x1, y1 = 2.2, 0 
+        x1, y1 = 2.1, 0 
     elif direction[0] == 's':
-        x1, y1 = 1.55, 4.8
+        x1, y1 = 1.5, 4.8
     elif direction[0] == 'e':
-        x1, y1 = 0, 2.15
+        x1, y1 = -0.6, 2.1
     elif direction[0] == 'w':
-        x1, y1 = 3.6, 2.7
+        x1, y1 = 4.2, 2.7
     
     if direction[1] == 'n':
-        x2, y2 = 2.2, 4.8
+        x2, y2 = 2.1, 4.8
     elif direction[1] == 's':
-        x2, y2 = 1.55, 0
+        x2, y2 = 1.5, 0
     elif direction[1] == 'e':
-        x2, y2 = 3.6, 2.15
+        x2, y2 = 4.2, 2.1
     elif direction[1] == 'w':
-        x2, y2 = 0, 2.7
+        x2, y2 = -0.6, 2.7
 
     if direction == 'nw':
         gen_straight_line((x1,y1), (x1,y2-0.9))
@@ -80,7 +83,7 @@ def gen_semi_circle(x, y, direction, curve_radius):
     for i in circle[1:-1]:
         x_float = "{:.3f}".format(x + curve_radius * cos(i))
         y_float = "{:.3f}".format(y + curve_radius * sin(i))
-        print('(' + x_float+' '+y_float + ')', end=',')
+        print('(' + x_float+' '+y_float +' '+ str(turning_speed) + ')', end=',')
 
 def gen_straight_line(waypoint1, waypoint2):
 
@@ -95,7 +98,8 @@ def gen_straight_line(waypoint1, waypoint2):
     for i in range(int(d * 3)):
         x_float = "{:.3f}".format(path_x[i])
         y_float = "{:.3f}".format(path_y[i])
-        print('(' + x_float+' '+y_float + ')', end=',')
+        print('(' + x_float+' '+y_float+' '+ str(speed) + ')', end=',')
         
 if __name__ == "__main__":
-    gen_manhattan_path("se")
+    gen_straight_line((4.8, 2.7),(-0.6, 2.7))
+    #gen_manhattan_path("nw")

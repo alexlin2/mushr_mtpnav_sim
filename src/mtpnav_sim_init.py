@@ -14,17 +14,15 @@ from mushr_rhc_ros.srv import FollowPath
 from mushr_rhc_ros.msg import XYHVPath, XYHV
 from tf.transformations import quaternion_from_euler
 
-RADIUS = 0.63
-
 init_pose = {} 
 
 def get_start_pose(pub_init_pose, plan):
-    init_pose["car1"] = plan.pop(0)
-    init_pose["car2"] = plan.pop(0)
+    init_pose["car30"] = plan.pop(0)
+    init_pose["car38"] = plan.pop(0)
     #init_3 = plan.pop(0)
     #init_4 = plan.pop(0)
-    send_init_pose(pub_init_pose[0], init_pose["car1"])
-    send_init_pose(pub_init_pose[1], init_pose["car2"])
+    send_init_pose(pub_init_pose[0], init_pose["car30"])
+    send_init_pose(pub_init_pose[1], init_pose["car38"])
     #send_init_pose(pub_init_pose[2], init_3)
     #send_init_pose(pub_init_pose[3], init_4)
 
@@ -38,10 +36,11 @@ def send_nav_goal(plan):
         paths = XYHVPath()
         
         for i in range(1, len(goal)):
-            s = goal[i]
-            wp_x = float(s[s.find('(')+1:s.find(' ')])
-            wp_y = float(s[s.find(' ')+1:s.find(')')])
-            waypoints.append((wp_x, wp_y))
+            s = goal[i][goal[i].find('(')+1:goal[i].find(')')].split()
+            wp_x = float(s[0])
+            wp_y = float(s[1])
+            wp_v = float(s[2])
+            waypoints.append((wp_x, wp_y, wp_v))
             
         #print(waypoints)
 
@@ -52,7 +51,7 @@ def send_nav_goal(plan):
             path.x = x1[0]
             path.y = x1[1]
             path.h = math.atan2(x2[1] - path.y, x2[0] - path.x)
-            path.v = 1.0
+            path.v = x1[2]
             paths.waypoints.append(path) 
         
             
@@ -86,8 +85,8 @@ if __name__ == "__main__":
 
     if not real:
        
-        pub_init_pose_1 = rospy.Publisher("/car1/initialpose", PoseWithCovarianceStamped, queue_size=1)
-        pub_init_pose_2 = rospy.Publisher("/car2/initialpose", PoseWithCovarianceStamped, queue_size=1)
+        pub_init_pose_1 = rospy.Publisher("/car30/initialpose", PoseWithCovarianceStamped, queue_size=1)
+        pub_init_pose_2 = rospy.Publisher("/car38/initialpose", PoseWithCovarianceStamped, queue_size=1)
         #pub_init_pose_3 = rospy.Publisher("/car3/initialpose", PoseWithCovarianceStamped, queue_size=1)
         #pub_init_pose_4 = rospy.Publisher("/car4/initialpose", PoseWithCovarianceStamped, queue_size=1)
         pub_init_pose = [pub_init_pose_1, pub_init_pose_2]
