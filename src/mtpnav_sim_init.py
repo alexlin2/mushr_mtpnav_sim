@@ -116,6 +116,7 @@ def read_csv(plan_file):
         for j in range(2):
             x_coord = [float(idx) for idx in df['x{}'.format(j+1)][i].strip('][').split(', ')]
             y_coord = [float(idx) for idx in df['y{}'.format(j+1)][i].strip('][').split(', ')]
+            # TODO: Transform heading angle according to ROS
             heading = [float(idx) for idx in df['h{}'.format(j+1)][i].strip('][').split(', ')]
             vel = [float(idx) for idx in df['v{}'.format(j+1)][i].strip('][').split(', ')]
             throttle = [float(idx) for idx in df['a{}'.format(j+1)][i].strip('][').split(', ')]
