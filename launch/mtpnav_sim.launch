@@ -1,5 +1,5 @@
 <launch>
-    <arg name="plan_file" default="$(find mushr_mtpnav_sim)/start.txt" />
+    <arg name="plan_file" default="$(find mushr_mtpnav_sim)/2_agent_apr20.csv" />
     <arg name="real_car" default="true" />
     <arg name="use_algames" default="true" />
 

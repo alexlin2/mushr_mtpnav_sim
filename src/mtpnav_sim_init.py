@@ -28,8 +28,8 @@ def get_start_pose(pub_init_pose, plan):
     #send_init_pose(pub_init_pose[3], init_4)
 
 def get_start_pose_2(pub_init_pose, plan):
-    send_init_pose_2(pub_init_pose[0], plan[0][0])
-    send_init_pose_2(pub_init_pose[1], plan[1][0])
+    send_init_pose_2(pub_init_pose[0], plan[0])
+    send_init_pose_2(pub_init_pose[1], plan[1])
 
 def send_nav_goal(plan):
     for c in plan:
@@ -64,21 +64,25 @@ def send_nav_goal(plan):
         
 
 def send_nav_goal_2(plan):
-    car_nos = ["30", "38"]
+    two_paths = []
     for i in range(len(plan)):
         ref_traj = plan[i]
         paths = XYHVPath()
-        for j in range(0, len(ref_traj)):
+        for j in np.arange(0, len(ref_traj[0])-1, 2):
             path = XYHV()
-            wp = ref_traj[j]
+            wp = ref_traj[0][j], ref_traj[1][j], ref_traj[3][j]
+            wp2 = ref_traj[0][j+1], ref_traj[1][j+1], ref_traj[3][j+1]
             path.x = wp[0]
             path.y = wp[1]
-            path.h = wp[2]
-            path.v = wp[3]
+            path.h = math.atan2(wp2[1] - path.y, wp2[0] - path.x)
+            path.v = wp[2]
             paths.waypoints.append(path)
+        two_paths.append(paths)
 
-        send_path = rospy.ServiceProxy("/car" + car_nos[i] +"/rhcontroller/task/path", FollowPath)
-        send_path(paths)
+    send_path1 = rospy.ServiceProxy("/car30" +"/rhcontroller/task/path", FollowPath)
+    send_path2 = rospy.ServiceProxy("/car38" +"/rhcontroller/task/path", FollowPath)
+    send_path1(two_paths[0])
+    send_path2(two_paths[1])
     
 def cb_pose(msg, arg):
     current_pose[arg] = msg.pose
@@ -95,9 +99,10 @@ def send_init_pose(pub_init_pose, init_pose):
     pub_init_pose.publish(PoseWithCovarianceStamped(pose=pose))
 
 def send_init_pose_2(pub_init_pose, init_pose):
-    x, y, theta = init_pose[0], init_pose[1], init_pose[2]
+    x, y, theta = init_pose[0][0], init_pose[1][0], init_pose[2][0]
     q = Quaternion(*quaternion_from_euler(0, 0, theta))
     point = Point(x=x, y=y)
+    print(point)
     pose = PoseWithCovariance(pose=Pose(position=point, orientation=q))
     pub_init_pose.publish(PoseWithCovarianceStamped(pose=pose))
 
@@ -111,20 +116,21 @@ def read_csv(plan_file):
     """
     df = pd.read_csv(plan_file)
     all_ep_data = []
+    solved = df['solve'].values
     for i in range(len(df.values)):
-        all_player_data = []
-        for j in range(2):
-            x_coord = [float(idx) for idx in df['x{}'.format(j+1)][i].strip('][').split(', ')]
-            y_coord = [float(idx) for idx in df['y{}'.format(j+1)][i].strip('][').split(', ')]
-            # TODO: Transform heading angle according to ROS
-            # For algames, car facing east is at 0 deg and facing north is at 90 deg
-            heading = [float(idx) for idx in df['h{}'.format(j+1)][i].strip('][').split(', ')]
-            vel = [float(idx) for idx in df['v{}'.format(j+1)][i].strip('][').split(', ')]
-            throttle = [float(idx) for idx in df['a{}'.format(j+1)][i].strip('][').split(', ')]
-            player_data = [x_coord, y_coord, heading, vel, throttle]
-            all_player_data.append(player_data)
-        all_ep_data.append(all_player_data)
-
+        if solved[i]:
+            all_player_data = []
+            for j in range(2):
+                x_coord = [float(idx) for idx in df['x{}'.format(j+1)][i].strip('][').split(', ')]
+                y_coord = [float(idx) for idx in df['y{}'.format(j+1)][i].strip('][').split(', ')]
+                # TODO: Transform heading angle according to ROS
+                # For algames, car facing east is at 0 deg and facing north is at 90 deg
+                heading = [float(idx) for idx in df['h{}'.format(j+1)][i].strip('][').split(', ')]
+                vel = [float(idx) for idx in df['v{}'.format(j+1)][i].strip('][').split(', ')]
+                throttle = [float(idx) for idx in df['a{}'.format(j+1)][i].strip('][').split(', ')]
+                player_data = [x_coord, y_coord, heading, vel, throttle]
+                all_player_data.append(player_data)
+            all_ep_data.append(all_player_data)
     return all_ep_data
 
 if __name__ == "__main__":
@@ -136,7 +142,7 @@ if __name__ == "__main__":
 
     if use_algames:
         data = read_csv(plan_file)
-        plan = data[0]
+        plan = data[15]
     else:
         with open(plan_file) as f:
             plan = f.readlines()
@@ -157,7 +163,7 @@ if __name__ == "__main__":
         plan.pop(0)
         plan.pop(0)
 
-    rospy.sleep(1.0)
+    rospy.sleep(2.0)
     
     send_nav_goal_2(plan)
 
