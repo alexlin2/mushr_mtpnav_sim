@@ -54,16 +54,15 @@ def send_nav_goal(plan):
             path.v = x1[2]
             paths.waypoints.append(path) 
         
+        if car_number == 30:
+            send_path = rospy.ServiceProxy("/test/task/path", FollowPath)
+            send_path(paths)
             
         send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
         send_path(paths)
+    return paths
         
     
-
-def cb_pose(msg, arg):
-    current_pose[arg] = msg.pose
-    
-
 def send_init_pose(pub_init_pose, init_pose):
     pose_data = init_pose.split(",")
     assert len(pose_data) == 3
@@ -104,8 +103,7 @@ if __name__ == "__main__":
     rospy.sleep(1.0)
     
     send_nav_goal(plan)
-
-
+    
 
 
 
