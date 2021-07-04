@@ -1,5 +1,5 @@
 <launch>
-    <arg name="plan_file" default="$(find mushr_mtpnav_sim)/000.pt" />
+    <arg name="plan_file" default="$(find mushr_mtpnav_sim)/scenario_3221_3400.pth" />
     <arg name="real_car" default="true" />
     <arg name="use_algames" default="true" />
 

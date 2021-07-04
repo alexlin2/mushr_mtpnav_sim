@@ -13,7 +13,7 @@ from geometry_msgs.msg import (
 )
 from mushr_rhc_ros.srv import FollowPath
 from mushr_rhc_ros.msg import XYHVPath, XYHV
-from tf.transformations import quaternion_from_euler
+from scipy.spatial.transform import Rotation as R
 
 init_pose = {}
 
@@ -56,13 +56,11 @@ def send_nav_goal(plan):
     send_path1(two_paths[0])
     send_path2(two_paths[1])
     
-def cb_pose(msg, arg):
-    current_pose[arg] = msg.pose
-    
 
 def send_init_pose(pub_init_pose, init_pose):
     x, y, theta = init_pose[0], init_pose[1], init_pose[2]
-    q = Quaternion(*quaternion_from_euler(0, 0, theta))
+    r = R.from_euler('z', theta)
+    q = Quaternion(r.as_quat()[0],r.as_quat()[1],r.as_quat()[2],r.as_quat()[3])
     point = Point(x=x, y=y)
     print(point)
     pose = PoseWithCovariance(pose=Pose(position=point, orientation=q))
@@ -85,7 +83,7 @@ if __name__ == "__main__":
     plan_file = rospy.get_param("~plan_file")
     real = rospy.get_param("~real_car")
 
-    plan = read_pt(plan_file, 200)
+    plan = read_pt(plan_file, 55)
     
     if not real:
        
