@@ -1,8 +1,8 @@
 from math import cos, sin, pi, sqrt
 import numpy as np
 
-turning_speed = 0.6
-speed = 0.25
+turning_speed = 0.5
+speed = 0.5
 
 def gen_manhattan_path(direction):
     
@@ -101,5 +101,5 @@ def gen_straight_line(waypoint1, waypoint2):
         print('(' + x_float+' '+y_float+' '+ str(speed) + ')', end=',')
         
 if __name__ == "__main__":
-    #gen_straight_line((4.2, 2.7),(-0.6, 2.7))
-    gen_manhattan_path("nw")
+    #gen_straight_line((2.1,0.0),(2.1,4.8))
+    gen_manhattan_path("ws")

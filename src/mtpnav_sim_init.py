@@ -57,9 +57,10 @@ def send_nav_goal(plan):
         if car_number == 30:
             send_path = rospy.ServiceProxy("/test/task/path", FollowPath)
             send_path(paths)
-            
-        send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
-        send_path(paths)
+
+        else:
+            send_path = rospy.ServiceProxy("/car" + str(car_number) +"/rhcontroller/task/path", FollowPath)
+            send_path(paths)
     return paths
         
     
